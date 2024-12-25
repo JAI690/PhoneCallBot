@@ -152,3 +152,21 @@ Resources:
       PackageType: Image
       Code:
         ImageUri: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/lambda-vonage-api:latest"
+      MemorySize: 512
+      Timeout: 30
+
+  Policies:
+  - PolicyName: LambdaECRAccess
+    PolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Action:
+            - ecr:GetAuthorizationToken
+            - ecr:BatchCheckLayerAvailability
+            - ecr:GetDownloadUrlForLayer
+            - ecr:InitiateLayerUpload
+            - ecr:UploadLayerPart
+            - ecr:PutImage
+            - lambda:UpdateFunctionCode
+          Resource: "*"
