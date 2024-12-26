@@ -1,4 +1,10 @@
 version: 0.2
+
+env:
+  variables:
+    AWS_ACCOUNT_ID: "123456789012" # Cambia por tu cuenta de AWS
+    AWS_DEFAULT_REGION: "us-east-1" # Cambia por tu región
+
 phases:
   pre_build:
     commands:
@@ -6,12 +12,16 @@ phases:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
-      - echo Building the Docker image...
+      - echo Building Docker image...
       - docker build -t lambda-vonage-api .
       - docker tag lambda-vonage-api:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
   post_build:
     commands:
-      - echo Pushing the Docker image...
+      - echo Pushing Docker image to ECR...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
       - echo "Updating Lambda function to use new Docker image..."
       - aws lambda update-function-code --function-name lambda-vonage-api --image-uri $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
+
+artifacts:
+  files:
+    - '**/*'
