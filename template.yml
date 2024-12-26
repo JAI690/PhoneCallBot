@@ -58,7 +58,7 @@ Resources:
   ApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: LambdaVonageApi
+      Name: LambdaVonageApiv2
 
   # Recurso para /call
   CallResource:
