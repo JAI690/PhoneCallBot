@@ -19,9 +19,8 @@ phases:
     commands:
       - echo Pushing Docker image to ECR...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
-      - echo "Updating Lambda function to use new Docker image..."
-      - aws lambda update-function-code --function-name lambda-vonage-api --image-uri $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
-
+      - echo "Updating CloudFormation stack..."
+      - aws cloudformation update-stack --stack-name your-stack-name --template-body file://template.yml --capabilities CAPABILITY_IAM
 artifacts:
   files:
     - '**/*'

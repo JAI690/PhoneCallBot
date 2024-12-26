@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Resources for Lambda Deployment with ECR Integration
+Description: Recursos para el despliegue de Lambda con integración ECR y API Gateway.
 
 Resources:
-  # Lambda Execution Role
+  # Rol de Ejecución Lambda
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -30,19 +30,19 @@ Resources:
                   - logs:PutLogEvents
                 Resource: "*"
 
-  # ECR Repository
+  # Repositorio de ECR
   ECRRepository:
     Type: AWS::ECR::Repository
     Properties:
       RepositoryName: lambda-vonage-api
 
-  # S3 Bucket for Artifacts
+  # Bucket S3 para Artefactos
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "${AWS::StackName}-artifact-bucket-${AWS::AccountId}-${AWS::Region}"
 
-  # Lambda Function
+  # Función Lambda
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -53,3 +53,64 @@ Resources:
         ImageUri: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/lambda-vonage-api:latest"
       MemorySize: 512
       Timeout: 30
+
+  # API Gateway Rest API
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: LambdaVonageApi
+
+  # Recurso para /call
+  CallResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: call
+      RestApiId: !Ref ApiGateway
+
+  # Método POST para /call
+  CallMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: POST
+      ResourceId: !Ref CallResource
+      RestApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations"
+
+  # Recurso para /getCall
+  GetCallResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: getCall
+      RestApiId: !Ref ApiGateway
+
+  # Método GET para /getCall
+  GetCallMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: GET
+      ResourceId: !Ref GetCallResource
+      RestApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations"
+
+  # Permiso para que API Gateway invoque la función Lambda
+  LambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunction
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  ApiEndpoint:
+    Description: "URL de invocación de la API"
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod"
