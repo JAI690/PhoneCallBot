@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CI/CD Pipeline for Lambda Deployment with ECR and GitHub Integration
+Description: Resources for Lambda Deployment with ECR Integration
 
 Resources:
-  # Pipeline Role
-  CodePipelineRole:
+  # Lambda Execution Role
+  LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -11,58 +11,23 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: codepipeline.amazonaws.com
-            Action: sts:AssumeRole
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
       Policies:
-        - PolicyName: CodePipelinePolicy
+        - PolicyName: LambdaPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
-                  - codebuild:StartBuild
-                  - codebuild:BatchGetBuilds
-                  - codebuild:BatchGetBuildProjects
-                  - lambda:UpdateFunctionCode
                   - ecr:GetAuthorizationToken
                   - ecr:BatchCheckLayerAvailability
-                  - ecr:CompleteLayerUpload
                   - ecr:GetDownloadUrlForLayer
-                  - ecr:InitiateLayerUpload
-                  - ecr:PutImage
-                  - ecr:UploadLayerPart
-                Resource: "*"
-
-  # CodeBuild Role
-  CodeBuildRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: CodeBuildPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  - ecr:GetAuthorizationToken
-                  - ecr:BatchCheckLayerAvailability
-                  - ecr:GetDownloadUrlForLayer
-                  - ecr:InitiateLayerUpload
-                  - ecr:UploadLayerPart
-                  - ecr:PutImage
-                  - s3:GetObject
-                  - s3:PutObject
-                  - lambda:UpdateFunctionCode
                 Resource: "*"
 
   # ECR Repository
@@ -71,102 +36,20 @@ Resources:
     Properties:
       RepositoryName: lambda-vonage-api
 
-  # CodeBuild Project
-  CodeBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: LambdaVonageBuild
-      Source:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:6.0
-        PrivilegedMode: true
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Artifacts:
-        Type: CODEPIPELINE
-
-  # CodePipeline
-  CodePipeline:
-    Type: AWS::CodePipeline::Pipeline
-    Properties:
-      RoleArn: !GetAtt CodePipelineRole.Arn
-      Stages:
-        - Name: Source
-          Actions:
-            - Name: GitHubSource
-              ActionTypeId:
-                Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
-                Version: 1
-              Configuration:
-                Owner: JAI690
-                Repo: PhoneCallBot
-                Branch: main
-              OutputArtifacts:
-                - Name: SourceOutput
-        - Name: Build
-          Actions:
-            - Name: BuildAction
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: 1
-              InputArtifacts:
-                - Name: SourceOutput
-              OutputArtifacts:
-                - Name: BuildOutput
-              Configuration:
-                ProjectName: !Ref CodeBuildProject
-        - Name: Deploy
-          Actions:
-            - Name: DeployToLambda
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Provider: Lambda
-                Version: 1
-              InputArtifacts:
-                - Name: BuildOutput
-              Configuration:
-                FunctionName: lambda-vonage-api
-      ArtifactStore:
-        Type: S3
-        Location: !Sub "${AWS::StackName}-artifact-bucket"
-
-  # S3 Bucket for Pipeline Artifacts
+  # S3 Bucket for Artifacts
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-artifact-bucket"
+      BucketName: !Sub "${AWS::StackName}-artifact-bucket-${AWS::AccountId}-${AWS::Region}"
 
   # Lambda Function
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: lambda-vonage-api
-      Role: !GetAtt CodeBuildRole.Arn
+      Role: !GetAtt LambdaExecutionRole.Arn
       PackageType: Image
       Code:
         ImageUri: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/lambda-vonage-api:latest"
       MemorySize: 512
       Timeout: 30
-
-  Policies:
-  - PolicyName: LambdaECRAccess
-    PolicyDocument:
-      Version: '2012-10-17'
-      Statement:
-        - Effect: Allow
-          Action:
-            - ecr:GetAuthorizationToken
-            - ecr:BatchCheckLayerAvailability
-            - ecr:GetDownloadUrlForLayer
-            - ecr:InitiateLayerUpload
-            - ecr:UploadLayerPart
-            - ecr:PutImage
-            - lambda:UpdateFunctionCode
-          Resource: "*"
