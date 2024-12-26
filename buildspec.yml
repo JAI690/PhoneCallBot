@@ -22,5 +22,5 @@ phases:
       - echo "Subiendo la imagen a Amazon ECR..."
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/flask-api:latest
       - echo "Desplegando con AWS SAM..."
-      - sam deploy --template-file template.yaml --stack-name flask-api --capabilities CAPABILITY_IAM --image-repositories FlaskApiFunction=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/flask-api
+      - sam deploy --template-file template.yaml --stack-name flask-api --capabilities CAPABILITY_IAM --resolve-image-repos
 
