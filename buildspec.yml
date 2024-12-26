@@ -21,13 +21,13 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
       - echo "Checking if stack exists..."
       - |
-        STACK_EXISTENCE=$(aws cloudformation describe-stacks --stack-name call-bot 2>&1)
+        STACK_EXISTENCE=$(aws cloudformation describe-stacks --stack-name call-bot 2>&1) || echo "Stack does not exist"
         if echo $STACK_EXISTENCE | grep -q 'does not exist'; then
           echo "Creating CloudFormation stack..."
           aws cloudformation create-stack --stack-name call-bot --template-body file://template.yml --capabilities CAPABILITY_IAM
         else
           echo "Updating CloudFormation stack..."
-          aws cloudformation update-stack --stack-name call-bot --template-body file://template.yml --capabilities CAPABILITY_IAM
+          AWS_OUTPUT=$(aws cloudformation update-stack --stack-name call-bot --template-body file://template.yml --capabilities CAPABILITY_IAM 2>&1) || echo "Update failed: $AWS_OUTPUT"
         fi
 artifacts:
   files:
