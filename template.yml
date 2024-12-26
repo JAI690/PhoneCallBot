@@ -114,3 +114,4 @@ Outputs:
   ApiEndpoint:
     Description: "URL de invocación de la API"
     Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod"
+    
