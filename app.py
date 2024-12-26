@@ -64,7 +64,7 @@ def get_call():
 
         return jsonify({"message": "Status updated.", "status": call.model_dump()}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500    pass
+        return jsonify({"error": str(e)}), 500 
 
 # Lambda handler
 def lambda_handler(event, context):

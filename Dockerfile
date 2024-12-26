@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
 COPY . ${LAMBDA_TASK_ROOT}
 
 # Instala las dependencias
-RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements.txt
+RUN pip install --upgrade pip \
+    &&pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements.txt
 
 # Configura el handler para Lambda
 CMD ["app.lambda_handler"]
