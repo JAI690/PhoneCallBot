@@ -17,7 +17,7 @@ phases:
       - docker tag lambda-vonage-api:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
   post_build:
     commands:
-       - echo Pushing Docker image to ECR...
+      - echo Pushing Docker image to ECR...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
       - echo "Checking if stack exists..."
       - >
