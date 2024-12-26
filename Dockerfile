@@ -1,4 +1,4 @@
-FROM 637423663433.dkr.ecr.us-east-1.amazonaws.com/python:3.9-slim
+FROM 637423663433.dkr.ecr.us-east-1.amazonaws.com/python:3.9-slim-bullseye
 
 # Actualiza los paquetes y instala las dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
