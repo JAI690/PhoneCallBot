@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM public.ecr.aws/lambda/python:3.9
 
 # Actualiza los paquetes y instala las dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
