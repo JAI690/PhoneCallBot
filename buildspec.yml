@@ -14,4 +14,4 @@ phases:
       - echo Pushing the Docker image...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
       - echo "Updating Lambda function to use new Docker image..."
-      - aws lambda update-function-code --function-name lambda-vonage-api --image-uri <account-id>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
+      - aws lambda update-function-code --function-name lambda-vonage-api --image-uri $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
