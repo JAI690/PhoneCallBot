@@ -17,10 +17,18 @@ phases:
       - docker tag lambda-vonage-api:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
   post_build:
     commands:
-      - echo Pushing Docker image to ECR...
+       - echo Pushing Docker image to ECR...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lambda-vonage-api:latest
-      - echo "Updating CloudFormation stack..."
-      - aws cloudformation update-stack --stack-name call-bot --template-body file://template.yml --capabilities CAPABILITY_IAM
+      - echo "Checking if stack exists..."
+      - >
+        STACK_EXISTENCE=$(aws cloudformation describe-stacks --stack-name call-bot 2>&1)
+        if echo $STACK_EXISTENCE | grep -q 'does not exist'; then
+          echo "Creating CloudFormation stack..."
+          aws cloudformation create-stack --stack-name call-bot --template-body file://template.yml --capabilities CAPABILITY_IAM
+        else
+          echo "Updating CloudFormation stack..."
+          aws cloudformation update-stack --stack-name call-bot --template-body file://template.yml --capabilities CAPABILITY_IAM
+        fi
 artifacts:
   files:
     - '**/*'
