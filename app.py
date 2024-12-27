@@ -59,7 +59,7 @@ def call():
     except Exception as e:
         return jsonify({"error": str(e), "request": request.data}), 500
 
-@app.route('/getCall', methods=['GET'])
+@app.route('/getCall', methods=['POST'])
 def get_call():
     data = request.json
     call_sid = data.get('call_sid')
