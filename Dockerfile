@@ -1,4 +1,4 @@
-FROM 637423663433.dkr.ecr.us-east-1.amazonaws.com/python:3.9-slim-bullseye
+FROM public.ecr.aws/lambda/python:3.9
 
 # Actualiza los paquetes y prepara el entorno
 RUN apt-get update && apt-get install -y \
