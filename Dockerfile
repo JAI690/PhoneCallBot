@@ -1,6 +1,6 @@
-FROM public.ecr.aws/lambda/python:3.9
+FROM public.ecr.aws/lambda/python:3.12
 
-# Actualiza los paquetes y prepara el entorno
+# Actualiza los paquetes y instala las dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
     build-essential \
     libssl-dev \
@@ -9,15 +9,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Define el directorio de trabajo
-WORKDIR /var/task
-
-# Copia los archivos de la aplicación
-COPY . /var/task
+# Copia los archivos de tu aplicación
+COPY . ${LAMBDA_TASK_ROOT}
 
 # Instala las dependencias
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r /var/task/requirements.txt
+    &&pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements.txt
 
 # Configura el handler para Lambda
 CMD ["app.lambda_handler"]
