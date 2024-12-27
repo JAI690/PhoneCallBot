@@ -1,13 +1,16 @@
 FROM public.ecr.aws/lambda/python:3.12
 
 # Actualiza los paquetes y instala las dependencias del sistema necesarias
-RUN yum update && yum install -y \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    curl \
-    && yum clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN yum update -y && \
+    yum install -y \
+    gcc \
+    gcc-c++ \
+    libffi-devel \
+    openssl-devel \
+    curl && \
+    yum clean all && \
+    rm -rf /var/cache/yum
+
 
 # Copia los archivos de tu aplicación
 COPY . ${LAMBDA_TASK_ROOT}
