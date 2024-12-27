@@ -25,7 +25,7 @@ def get_secret(secret_name):
 secrets = get_secret('flask-api-secrets')
 VONAGE_APPLICATION_ID = secrets.get('VONAGE_APPLICATION_ID') if secrets else None
 VONAGE_APPLICATION_PRIVATE_KEY = secrets.get('VONAGE_APPLICATION_PRIVATE_KEY') if secrets else None
-
+VONAGE_APPLICATION_PRIVATE_KEY = VONAGE_APPLICATION_PRIVATE_KEY.replace("«", "\r\n")
 
 @app.route('/call', methods=['POST'])
 def call():
