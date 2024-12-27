@@ -15,7 +15,7 @@ phases:
   build:
     commands:
       - echo "Construyendo la imagen Docker..."
-      - docker build -t flask-api .
+      - docker build --platform linux/arm64 -t flask-api .
       - docker tag flask-api:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/flask-api:latest
   post_build:
     commands:

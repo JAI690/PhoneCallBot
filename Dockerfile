@@ -12,11 +12,9 @@ RUN yum update -y && \
     rm -rf /var/cache/yum
 
 
-# Define el directorio de trabajo
-WORKDIR /var/task
 
 # Copia los archivos de tu aplicación
-COPY . .
+COPY . ${LAMBDA_TASK_ROOT}
 
 # Instala las dependencias
 RUN pip install --upgrade pip \
