@@ -2,5 +2,4 @@ Flask==2.0.3
 Werkzeug==2.0.3
 aws_lambda_wsgi==0.0.6
 boto3==1.26.162
-requests
 vonage==4.0.0
