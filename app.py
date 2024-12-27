@@ -3,15 +3,29 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from aws_lambda_wsgi import lambda_handler as handler_adapter
 from vonage import Vonage, Auth
 from vonage_voice.models import CreateCallRequest, Talk
+import boto3
+import json
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
-# Vonage Configuration
-VONAGE_APPLICATION_ID = '5907ea82-c97c-4d78-bf07-7b5e7c7cad49'
-VONAGE_APPLICATION_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
-... (clave privada aquí) ...
------END PRIVATE KEY-----"""
+# Configuración global para secretos
+def get_secret(secret_name):
+    """Retrieve secret from AWS Secrets Manager."""
+    client = boto3.client('secretsmanager', region_name='us-east-1')
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+        secret = get_secret_value_response['SecretString']
+        return json.loads(secret)
+    except Exception as e:
+        print(f"Error retrieving secret: {e}")
+        return None
+
+# Obtener los secretos al iniciar la aplicación
+secrets = get_secret('flask-api-secrets')
+VONAGE_APPLICATION_ID = secrets.get('VONAGE_APPLICATION_ID') if secrets else None
+VONAGE_APPLICATION_PRIVATE_KEY = secrets.get('VONAGE_APPLICATION_PRIVATE_KEY') if secrets else None
+
 
 @app.route('/call', methods=['POST'])
 def call():

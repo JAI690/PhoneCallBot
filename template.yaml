@@ -25,6 +25,7 @@ Resources:
                   - ecr:GetDownloadUrlForLayer
                   - ecr:BatchGetImage
                   - ecr:GetAuthorizationToken
+                  - secretsmanager:GetSecretValue
                 Resource: "*"
 
   FlaskApiFunction:
