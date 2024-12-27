@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
-from aws_lambda_wsgi import lambda_handler as handler_adapter
+import aws_lambda_wsgi
 from vonage import Vonage, Auth
 from vonage_voice.models import CreateCallRequest, Talk
 import boto3
@@ -82,4 +82,4 @@ def get_call():
 
 # Lambda handler
 def lambda_handler(event, context):
-    return handler_adapter(app, event, context)
+    return aws_lambda_wsgi.response(app, event, context)
