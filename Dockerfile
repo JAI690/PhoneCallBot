@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.9
+FROM  --platform=linux/amd64 public.ecr.aws/lambda/python:3.9
 
 # Actualiza los paquetes y instala las dependencias del sistema necesarias
 RUN yum update -y && \
